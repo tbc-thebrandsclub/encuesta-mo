@@ -20,7 +20,7 @@
     
     <script type="text/babel">
         // ⚠️ IMPORTANTE: Pega aquí tu URL de Google Apps Script
-        const GOOGLE_SCRIPT_URL = 'https://script.google.com/a/macros/thebrandsclub.com/s/AKfycbzHN-1A0WbIE4hSIVhj3QSejpHU-vW1UHy3NnQr7T17cvFmf_riI1ehQ7oe7dPo3yR5rg/exec';
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/a/macros/thebrandsclub.com/s/AKfycbw8tMTBz3nzJAp8joUJYCfibsA0M3m5waIViO7elnkOY-v9lLJAf9_d5UMiHz3uOIZ_cw/exec';
 
         const SECTIONS = [
             {
@@ -151,12 +151,35 @@
                 };
                 
                 try {
-                    await fetch(GOOGLE_SCRIPT_URL, {
-                        method: 'POST',
-                        mode: 'no-cors',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(response)
-                    });
+                    // Crear iframe oculto para recibir la respuesta
+                    const iframeName = 'hidden_iframe_' + Date.now();
+                    const iframe = document.createElement('iframe');
+                    iframe.name = iframeName;
+                    iframe.style.display = 'none';
+                    document.body.appendChild(iframe);
+                    
+                    // Crear formulario oculto
+                    const form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = GOOGLE_SCRIPT_URL;
+                    form.target = iframeName;
+                    
+                    // Agregar datos como campo hidden
+                    const input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = 'data';
+                    input.value = JSON.stringify(response);
+                    form.appendChild(input);
+                    
+                    document.body.appendChild(form);
+                    form.submit();
+                    
+                    // Limpiar después de un momento
+                    setTimeout(() => {
+                        document.body.removeChild(form);
+                        document.body.removeChild(iframe);
+                    }, 2000);
+                    
                     setSubmitted(true);
                 } catch (error) {
                     console.error('Error al enviar:', error);
