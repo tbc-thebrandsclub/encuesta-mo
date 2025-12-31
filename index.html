@@ -19,21 +19,28 @@
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     
     <script type="text/babel">
-        // ⚠️ IMPORTANTE: Pega aquí tu URL de Google Apps Script
-        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxs8hzSj5lNOUgnsEi_bV2hScoj2_R0mAyt9hG4Cx-O0Zq44vsDRbIATdxFBmeG1kjJFg/exec';
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyVriSVE8hotO5ojjr4hef-490ZziUZt0rIFIw0sUkvcjHFy45pWkfD__ZEbgeYEAKKww/exec';
+
+        const SCALE_OPTIONS = [
+            { value: 1, label: 'Muy en desacuerdo' },
+            { value: 2, label: 'En desacuerdo' },
+            { value: 3, label: 'Neutral' },
+            { value: 4, label: 'De acuerdo' },
+            { value: 5, label: 'Muy de acuerdo' }
+        ];
 
         const SECTIONS = [
             {
                 id: 'A',
                 title: 'Claridad en criterios de decisión',
-                description: 'Esta sección explora qué tan claros y consistentes son los criterios con los que se toman decisiones en TBC.',
+                description: 'Esta sección explora qué tan claros y consistentes son los criterios con los que se toman decisiones.',
                 questions: [
                     { id: 'A1', text: 'Tengo claridad sobre los criterios que se usan para tomar decisiones importantes en mi área.' },
-                    { id: 'A2', text: 'Los criterios de decisión se aplican de manera consistente, independiente de quién esté involucrado.' },
-                    { id: 'A3', text: 'Cuando una decisión no sale como esperaba, entiendo las razones detrás.' },
-                    { id: 'A4', text: 'Los criterios para promociones, bonos y reconocimientos son claros y conocidos.' },
-                    { id: 'A5', text: 'Las prioridades de mi área se mantienen estables o, cuando cambian, entiendo por qué.' },
-                    { id: 'A6', text: 'Sé qué decisiones puedo tomar por mi cuenta y cuáles requieren aprobación.' },
+                    { id: 'A2', text: 'Tengo claridad sobre los criterios que se usan para tomar decisiones importantes a nivel de empresa.' },
+                    { id: 'A3', text: 'Los criterios de decisión se aplican de manera consistente en toda la organización.' },
+                    { id: 'A4', text: 'Cuando una decisión no sale como esperaba, entiendo las razones detrás.' },
+                    { id: 'A5', text: 'Los criterios para promociones, bonos y reconocimientos son claros y conocidos por todos.' },
+                    { id: 'A6', text: 'Las prioridades de la empresa se mantienen estables o, cuando cambian, se comunica claramente por qué.' },
                 ]
             },
             {
@@ -41,12 +48,11 @@
                 title: 'Roles y autoridad',
                 description: 'Esta sección explora qué tan claros son los roles y las líneas de autoridad en la organización.',
                 questions: [
-                    { id: 'B1', text: 'Está claro quién tiene la autoridad para tomar cada tipo de decisión en mi área.' },
-                    { id: 'B2', text: 'Las decisiones tomadas por mi jefatura directa rara vez son revertidas o modificadas por otros.' },
-                    { id: 'B3', text: 'Cuando necesito una aprobación, sé exactamente a quién acudir.' },
-                    { id: 'B4', text: 'Los canales formales de decisión son los que realmente funcionan en la práctica.' },
-                    { id: 'B5', text: 'Mi rol y responsabilidades están claramente definidos.' },
-                    { id: 'B6', text: 'Puedo ejecutar mi trabajo sin tener que validar constantemente con múltiples personas.' },
+                    { id: 'B1', text: 'Está claro quién tiene la autoridad para tomar decisiones dentro de mi área.' },
+                    { id: 'B2', text: 'Está claro quién tiene la autoridad final para tomar decisiones que involucran a toda la empresa.' },
+                    { id: 'B3', text: 'Las decisiones tomadas en mi área rara vez son revertidas o modificadas por otras áreas o niveles superiores.' },
+                    { id: 'B4', text: 'Cuando necesito una aprobación, sé exactamente a quién acudir y el proceso es claro.' },
+                    { id: 'B5', text: 'Los canales formales de decisión son los que realmente funcionan en la práctica.' },
                 ]
             },
             {
@@ -54,12 +60,14 @@
                 title: 'Autonomía y empoderamiento',
                 description: 'Esta sección explora el nivel de autonomía que tienen los equipos para ejecutar su trabajo.',
                 questions: [
-                    { id: 'C1', text: 'Tengo la autonomía suficiente para tomar decisiones dentro de mi ámbito de responsabilidad.' },
-                    { id: 'C2', text: 'Siento que mi criterio profesional es valorado y considerado.' },
-                    { id: 'C3', text: 'Puedo proponer mejoras o cambios y estos son escuchados.' },
-                    { id: 'C4', text: 'Mi jefatura me da espacio para resolver problemas antes de intervenir.' },
-                    { id: 'C5', text: 'El nivel de supervisión que recibo es apropiado para mi rol y experiencia.' },
-                    { id: 'C6', text: 'Me siento responsable de los resultados de mi área, no solo de ejecutar tareas.' },
+                    { id: 'C1', text: 'Mi jefatura directa me da autonomía para tomar decisiones dentro de mi ámbito de responsabilidad.' },
+                    { id: 'C2', text: 'La empresa en general respeta la autonomía de las áreas para tomar decisiones dentro de su ámbito.' },
+                    { id: 'C3', text: 'El criterio profesional de los equipos es valorado y considerado en las decisiones.' },
+                    { id: 'C4', text: 'Cuando alguien propone mejoras o cambios, estos son escuchados independientemente de su cargo.' },
+                    { id: 'C5', text: 'Mi jefatura directa da espacio para resolver problemas antes de intervenir.' },
+                    { id: 'C6', text: 'Los niveles superiores de la empresa dan espacio a las áreas para resolver problemas antes de intervenir.' },
+                    { id: 'C7', text: 'El nivel de supervisión en la empresa es apropiado y no excesivo.' },
+                    { id: 'C8', text: 'Me siento responsable de los resultados de mi trabajo, no solo de ejecutar instrucciones.' },
                 ]
             },
             {
@@ -67,11 +75,11 @@
                 title: 'Comunicación y transparencia',
                 description: 'Esta sección explora qué tan abierta y segura es la comunicación en la organización.',
                 questions: [
-                    { id: 'D1', text: 'Me siento cómodo/a planteando problemas o alertas a mi jefatura.' },
-                    { id: 'D2', text: 'Puedo expresar desacuerdo con una decisión sin que esto tenga consecuencias negativas.' },
+                    { id: 'D1', text: 'En TBC es seguro plantear problemas o alertas sin temor a consecuencias negativas.' },
+                    { id: 'D2', text: 'Se puede expresar desacuerdo con una decisión de manera abierta y constructiva.' },
                     { id: 'D3', text: 'Los problemas se abordan abiertamente antes de que escalen.' },
-                    { id: 'D4', text: 'Recibo información suficiente sobre las decisiones que afectan mi trabajo.' },
-                    { id: 'D5', text: 'El feedback que recibo es constructivo y me ayuda a mejorar.' },
+                    { id: 'D4', text: 'La información sobre decisiones importantes fluye de manera clara a toda la organización.' },
+                    { id: 'D5', text: 'El feedback en la empresa es constructivo y ayuda a mejorar.' },
                     { id: 'D6', text: 'Cuando algo sale mal, el foco está en resolver el problema, no en buscar culpables.' },
                 ]
             },
@@ -80,12 +88,11 @@
                 title: 'Coordinación y eficiencia',
                 description: 'Esta sección explora qué tan eficientes son los procesos de coordinación y toma de decisiones.',
                 questions: [
-                    { id: 'E1', text: 'Las decisiones se toman con la velocidad necesaria para el negocio.' },
+                    { id: 'E1', text: 'Las decisiones en TBC se toman con la velocidad necesaria para el negocio.' },
                     { id: 'E2', text: 'Rara vez tengo que rehacer trabajo por cambios de última hora en las prioridades.' },
                     { id: 'E3', text: 'La coordinación entre áreas funciona de manera fluida.' },
                     { id: 'E4', text: 'Los procesos de aprobación son proporcionales a la importancia de la decisión.' },
                     { id: 'E5', text: 'Las reuniones en las que participo son productivas y terminan con decisiones claras.' },
-                    { id: 'E6', text: 'Dedico la mayor parte de mi tiempo a trabajo productivo, no a alinear o validar.' },
                 ]
             }
         ];
@@ -96,8 +103,6 @@
             { id: 'F3', text: '¿Hay algo que te gustaría agregar sobre cómo funciona la organización hoy?' },
         ];
 
-        const AREAS = ['Comercial', 'Operaciones / Supply Chain', 'Finanzas / Administración', 'Personas / RRHH', 'Tecnología', 'Otra'];
-        const NIVELES = ['Gerente', 'Subgerente / Jefe', 'Coordinador / Supervisor', 'Analista / Especialista'];
         const ANTIGUEDAD = ['Menos de 1 año', '1 a 3 años', '3 a 5 años', 'Más de 5 años'];
 
         function App() {
@@ -105,13 +110,15 @@
             const [currentSection, setCurrentSection] = React.useState(0);
             const [answers, setAnswers] = React.useState({});
             const [openAnswers, setOpenAnswers] = React.useState({});
-            const [demographics, setDemographics] = React.useState({ area: '', nivel: '', antiguedad: '' });
+            const [demographics, setDemographics] = React.useState({ antiguedad: '' });
             const [submitted, setSubmitted] = React.useState(false);
             const [isSubmitting, setIsSubmitting] = React.useState(false);
             const [submitError, setSubmitError] = React.useState(null);
+            const [showIncompleteWarning, setShowIncompleteWarning] = React.useState(false);
 
             const handleAnswer = (questionId, value) => {
                 setAnswers(prev => ({ ...prev, [questionId]: value }));
+                setShowIncompleteWarning(false);
             };
 
             const handleOpenAnswer = (questionId, value) => {
@@ -133,6 +140,15 @@
                 return Math.round((answered / totalQuestions) * 100);
             };
 
+            const handleNextSection = () => {
+                if (!isSectionComplete(currentSection)) {
+                    setShowIncompleteWarning(true);
+                    return;
+                }
+                setShowIncompleteWarning(false);
+                setCurrentSection(prev => prev + 1);
+            };
+
             const handleSubmit = async () => {
                 if (GOOGLE_SCRIPT_URL === 'PEGA_AQUI_TU_URL') {
                     setSubmitError('Error de configuración: Falta configurar la URL del servidor.');
@@ -151,20 +167,17 @@
                 };
                 
                 try {
-                    // Crear iframe oculto para recibir la respuesta
                     const iframeName = 'hidden_iframe_' + Date.now();
                     const iframe = document.createElement('iframe');
                     iframe.name = iframeName;
                     iframe.style.display = 'none';
                     document.body.appendChild(iframe);
                     
-                    // Crear formulario oculto
                     const form = document.createElement('form');
                     form.method = 'POST';
                     form.action = GOOGLE_SCRIPT_URL;
                     form.target = iframeName;
                     
-                    // Agregar datos como campo hidden
                     const input = document.createElement('input');
                     input.type = 'hidden';
                     input.name = 'data';
@@ -174,7 +187,6 @@
                     document.body.appendChild(form);
                     form.submit();
                     
-                    // Limpiar después de un momento
                     setTimeout(() => {
                         document.body.removeChild(form);
                         document.body.removeChild(iframe);
@@ -298,30 +310,46 @@
                             {SECTIONS.map((s, idx) => (
                                 <button
                                     key={s.id}
-                                    onClick={() => setCurrentSection(idx)}
+                                    onClick={() => {
+                                        // Solo permitir ir a secciones anteriores o a la actual
+                                        if (idx <= currentSection) {
+                                            setCurrentSection(idx);
+                                            setShowIncompleteWarning(false);
+                                        }
+                                    }}
                                     className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-all ${
                                         idx === currentSection 
                                             ? 'bg-blue-900 text-white shadow-lg shadow-blue-900/20' 
                                             : isSectionComplete(idx)
-                                                ? 'bg-emerald-100 text-emerald-700'
-                                                : 'bg-white text-slate-500 hover:bg-slate-50'
+                                                ? 'bg-emerald-100 text-emerald-700 cursor-pointer'
+                                                : idx < currentSection
+                                                    ? 'bg-white text-slate-500 cursor-pointer'
+                                                    : 'bg-white text-slate-300 cursor-not-allowed'
                                     }`}
                                 >
                                     {s.id}
                                 </button>
                             ))}
                             <button
-                                onClick={() => setCurrentSection(SECTIONS.length)}
+                                onClick={() => {
+                                    if (currentSection >= SECTIONS.length) {
+                                        setCurrentSection(SECTIONS.length);
+                                    }
+                                }}
                                 className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-all ${
-                                    showOpenQuestions ? 'bg-blue-900 text-white' : 'bg-white text-slate-500 hover:bg-slate-50'
+                                    showOpenQuestions ? 'bg-blue-900 text-white' : currentSection >= SECTIONS.length ? 'bg-white text-slate-500 cursor-pointer' : 'bg-white text-slate-300 cursor-not-allowed'
                                 }`}
                             >
                                 F
                             </button>
                             <button
-                                onClick={() => setCurrentSection(SECTIONS.length + 1)}
+                                onClick={() => {
+                                    if (currentSection >= SECTIONS.length + 1) {
+                                        setCurrentSection(SECTIONS.length + 1);
+                                    }
+                                }}
                                 className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-all ${
-                                    showDemographics ? 'bg-blue-900 text-white' : 'bg-white text-slate-500 hover:bg-slate-50'
+                                    showDemographics ? 'bg-blue-900 text-white' : currentSection >= SECTIONS.length + 1 ? 'bg-white text-slate-500 cursor-pointer' : 'bg-white text-slate-300 cursor-not-allowed'
                                 }`}
                             >
                                 ✓
@@ -339,49 +367,54 @@
                                     <p className="text-slate-500">{section.description}</p>
                                 </div>
 
-                                <div className="flex justify-between text-xs text-slate-400 mb-6 px-2">
-                                    <span>Muy en desacuerdo</span>
-                                    <span>Muy de acuerdo</span>
-                                </div>
-
                                 <div className="space-y-6">
                                     {section.questions.map((q) => (
-                                        <div key={q.id} className="p-4 rounded-xl bg-slate-50 hover:bg-slate-100 transition-colors">
-                                            <div className="flex gap-4">
-                                                <span className="text-blue-900 font-semibold text-sm mt-1">{q.id}</span>
-                                                <div className="flex-1">
-                                                    <p className="text-slate-700 mb-4">{q.text}</p>
-                                                    <div className="flex justify-between gap-2">
-                                                        {[1, 2, 3, 4, 5].map(value => (
-                                                            <button
-                                                                key={value}
-                                                                onClick={() => handleAnswer(q.id, value)}
-                                                                className={`flex-1 py-3 rounded-lg font-medium transition-all ${
-                                                                    answers[q.id] === value
-                                                                        ? 'bg-blue-900 text-white shadow-lg shadow-blue-900/20 scale-105'
-                                                                        : 'bg-white text-slate-600 hover:bg-blue-50 border border-slate-200'
-                                                                }`}
-                                                            >
-                                                                {value}
-                                                            </button>
-                                                        ))}
-                                                    </div>
-                                                </div>
+                                        <div key={q.id} className={`p-4 rounded-xl transition-colors ${answers[q.id] !== undefined ? 'bg-emerald-50' : 'bg-slate-50'}`}>
+                                            <div className="mb-4">
+                                                <span className="text-blue-900 font-semibold text-sm">{q.id}.</span>
+                                                <span className="text-slate-700 ml-2">{q.text}</span>
+                                            </div>
+                                            <div className="grid grid-cols-5 gap-2">
+                                                {SCALE_OPTIONS.map(option => (
+                                                    <button
+                                                        key={option.value}
+                                                        onClick={() => handleAnswer(q.id, option.value)}
+                                                        className={`py-2 px-1 rounded-lg text-xs font-medium transition-all ${
+                                                            answers[q.id] === option.value
+                                                                ? 'bg-blue-900 text-white shadow-lg shadow-blue-900/20 scale-105'
+                                                                : 'bg-white text-slate-600 hover:bg-blue-50 border border-slate-200'
+                                                        }`}
+                                                    >
+                                                        {option.label}
+                                                    </button>
+                                                ))}
                                             </div>
                                         </div>
                                     ))}
                                 </div>
 
+                                {showIncompleteWarning && (
+                                    <div className="mt-6 p-4 bg-amber-50 border border-amber-200 text-amber-800 rounded-xl text-sm flex items-center gap-3">
+                                        <svg className="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                        </svg>
+                                        Por favor responde todas las preguntas de esta sección antes de continuar.
+                                    </div>
+                                )}
+
                                 <div className="flex justify-between mt-8 pt-6 border-t border-slate-100">
                                     <button
-                                        onClick={() => setCurrentSection(prev => Math.max(0, prev - 1))}
+                                        onClick={() => {
+                                            setCurrentSection(prev => Math.max(0, prev - 1));
+                                            setShowIncompleteWarning(false);
+                                        }}
                                         disabled={currentSection === 0}
                                         className="px-6 py-3 text-slate-500 hover:text-slate-700 disabled:opacity-30 font-medium"
                                     >
                                         ← Anterior
                                     </button>
                                     <button
-                                        onClick={() => setCurrentSection(prev => prev + 1)}
+                                        onClick={handleNextSection}
                                         className="px-6 py-3 bg-blue-900 text-white rounded-xl font-medium hover:bg-blue-800 transition-colors shadow-lg shadow-blue-900/20"
                                     >
                                         Siguiente →
@@ -433,73 +466,33 @@
                             </div>
                         )}
 
-                        {/* Demographics */}
+                        {/* Demographics - Solo Antigüedad */}
                         {showDemographics && (
                             <div className="bg-white rounded-2xl shadow-lg shadow-slate-200/50 p-8 fade-in">
                                 <div className="mb-8">
                                     <div className="inline-flex items-center gap-2 px-3 py-1 bg-amber-100 text-amber-700 rounded-full text-sm font-medium mb-4">
                                         Último paso
                                     </div>
-                                    <h2 className="text-2xl font-semibold text-slate-800 mb-2">Datos de clasificación</h2>
-                                    <p className="text-slate-500">Estos datos se usan solo para analizar resultados por segmento.</p>
+                                    <h2 className="text-2xl font-semibold text-slate-800 mb-2">Antes de enviar</h2>
+                                    <p className="text-slate-500">Esta información se usa solo para analizar resultados de forma agregada.</p>
                                 </div>
 
-                                <div className="space-y-6">
-                                    <div>
-                                        <label className="block text-slate-700 font-medium mb-3">Área</label>
-                                        <div className="grid grid-cols-2 gap-3">
-                                            {AREAS.map(area => (
-                                                <button
-                                                    key={area}
-                                                    onClick={() => handleDemographic('area', area)}
-                                                    className={`p-4 rounded-xl text-left transition-all text-sm ${
-                                                        demographics.area === area
-                                                            ? 'bg-blue-900 text-white shadow-lg'
-                                                            : 'bg-slate-50 text-slate-700 hover:bg-slate-100'
-                                                    }`}
-                                                >
-                                                    {area}
-                                                </button>
-                                            ))}
-                                        </div>
-                                    </div>
-
-                                    <div>
-                                        <label className="block text-slate-700 font-medium mb-3">Nivel</label>
-                                        <div className="grid grid-cols-2 gap-3">
-                                            {NIVELES.map(nivel => (
-                                                <button
-                                                    key={nivel}
-                                                    onClick={() => handleDemographic('nivel', nivel)}
-                                                    className={`p-4 rounded-xl text-left transition-all text-sm ${
-                                                        demographics.nivel === nivel
-                                                            ? 'bg-blue-900 text-white shadow-lg'
-                                                            : 'bg-slate-50 text-slate-700 hover:bg-slate-100'
-                                                    }`}
-                                                >
-                                                    {nivel}
-                                                </button>
-                                            ))}
-                                        </div>
-                                    </div>
-
-                                    <div>
-                                        <label className="block text-slate-700 font-medium mb-3">Antigüedad en TBC</label>
-                                        <div className="grid grid-cols-2 gap-3">
-                                            {ANTIGUEDAD.map(ant => (
-                                                <button
-                                                    key={ant}
-                                                    onClick={() => handleDemographic('antiguedad', ant)}
-                                                    className={`p-4 rounded-xl text-left transition-all text-sm ${
-                                                        demographics.antiguedad === ant
-                                                            ? 'bg-blue-900 text-white shadow-lg'
-                                                            : 'bg-slate-50 text-slate-700 hover:bg-slate-100'
-                                                    }`}
-                                                >
-                                                    {ant}
-                                                </button>
-                                            ))}
-                                        </div>
+                                <div>
+                                    <label className="block text-slate-700 font-medium mb-3">¿Cuánto tiempo llevas en TBC?</label>
+                                    <div className="grid grid-cols-2 gap-3">
+                                        {ANTIGUEDAD.map(ant => (
+                                            <button
+                                                key={ant}
+                                                onClick={() => handleDemographic('antiguedad', ant)}
+                                                className={`p-4 rounded-xl text-left transition-all text-sm ${
+                                                    demographics.antiguedad === ant
+                                                        ? 'bg-blue-900 text-white shadow-lg'
+                                                        : 'bg-slate-50 text-slate-700 hover:bg-slate-100'
+                                                }`}
+                                            >
+                                                {ant}
+                                            </button>
+                                        ))}
                                     </div>
                                 </div>
 
@@ -518,7 +511,7 @@
                                     </button>
                                     <button
                                         onClick={handleSubmit}
-                                        disabled={!demographics.area || !demographics.nivel || !demographics.antiguedad || isSubmitting}
+                                        disabled={!demographics.antiguedad || isSubmitting}
                                         className="px-8 py-3 bg-emerald-600 text-white rounded-xl font-medium hover:bg-emerald-700 transition-colors shadow-lg shadow-emerald-600/20 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                                     >
                                         {isSubmitting ? (
