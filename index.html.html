@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Encuesta Modelo Operativo | TBC</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        * { font-family: 'Segoe UI', system-ui, sans-serif; }
+        .fade-in { animation: fadeIn 0.3s ease-in; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+    
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <script type="text/babel">
+        // ⚠️ IMPORTANTE: Pega aquí tu URL de Google Apps Script
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/a/macros/thebrandsclub.com/s/AKfycbzHN-1A0WbIE4hSIVhj3QSejpHU-vW1UHy3NnQr7T17cvFmf_riI1ehQ7oe7dPo3yR5rg/exec';
+
+        const SECTIONS = [
+            {
+                id: 'A',
+                title: 'Claridad en criterios de decisión',
+                description: 'Esta sección explora qué tan claros y consistentes son los criterios con los que se toman decisiones en TBC.',
+                questions: [
+                    { id: 'A1', text: 'Tengo claridad sobre los criterios que se usan para tomar decisiones importantes en mi área.' },
+                    { id: 'A2', text: 'Los criterios de decisión se aplican de manera consistente, independiente de quién esté involucrado.' },
+                    { id: 'A3', text: 'Cuando una decisión no sale como esperaba, entiendo las razones detrás.' },
+                    { id: 'A4', text: 'Los criterios para promociones, bonos y reconocimientos son claros y conocidos.' },
+                    { id: 'A5', text: 'Las prioridades de mi área se mantienen estables o, cuando cambian, entiendo por qué.' },
+                    { id: 'A6', text: 'Sé qué decisiones puedo tomar por mi cuenta y cuáles requieren aprobación.' },
+                ]
+            },
+            {
+                id: 'B',
+                title: 'Roles y autoridad',
+                description: 'Esta sección explora qué tan claros son los roles y las líneas de autoridad en la organización.',
+                questions: [
+                    { id: 'B1', text: 'Está claro quién tiene la autoridad para tomar cada tipo de decisión en mi área.' },
+                    { id: 'B2', text: 'Las decisiones tomadas por mi jefatura directa rara vez son revertidas o modificadas por otros.' },
+                    { id: 'B3', text: 'Cuando necesito una aprobación, sé exactamente a quién acudir.' },
+                    { id: 'B4', text: 'Los canales formales de decisión son los que realmente funcionan en la práctica.' },
+                    { id: 'B5', text: 'Mi rol y responsabilidades están claramente definidos.' },
+                    { id: 'B6', text: 'Puedo ejecutar mi trabajo sin tener que validar constantemente con múltiples personas.' },
+                ]
+            },
+            {
+                id: 'C',
+                title: 'Autonomía y empoderamiento',
+                description: 'Esta sección explora el nivel de autonomía que tienen los equipos para ejecutar su trabajo.',
+                questions: [
+                    { id: 'C1', text: 'Tengo la autonomía suficiente para tomar decisiones dentro de mi ámbito de responsabilidad.' },
+                    { id: 'C2', text: 'Siento que mi criterio profesional es valorado y considerado.' },
+                    { id: 'C3', text: 'Puedo proponer mejoras o cambios y estos son escuchados.' },
+                    { id: 'C4', text: 'Mi jefatura me da espacio para resolver problemas antes de intervenir.' },
+                    { id: 'C5', text: 'El nivel de supervisión que recibo es apropiado para mi rol y experiencia.' },
+                    { id: 'C6', text: 'Me siento responsable de los resultados de mi área, no solo de ejecutar tareas.' },
+                ]
+            },
+            {
+                id: 'D',
+                title: 'Comunicación y transparencia',
+                description: 'Esta sección explora qué tan abierta y segura es la comunicación en la organización.',
+                questions: [
+                    { id: 'D1', text: 'Me siento cómodo/a planteando problemas o alertas a mi jefatura.' },
+                    { id: 'D2', text: 'Puedo expresar desacuerdo con una decisión sin que esto tenga consecuencias negativas.' },
+                    { id: 'D3', text: 'Los problemas se abordan abiertamente antes de que escalen.' },
+                    { id: 'D4', text: 'Recibo información suficiente sobre las decisiones que afectan mi trabajo.' },
+                    { id: 'D5', text: 'El feedback que recibo es constructivo y me ayuda a mejorar.' },
+                    { id: 'D6', text: 'Cuando algo sale mal, el foco está en resolver el problema, no en buscar culpables.' },
+                ]
+            },
+            {
+                id: 'E',
+                title: 'Coordinación y eficiencia',
+                description: 'Esta sección explora qué tan eficientes son los procesos de coordinación y toma de decisiones.',
+                questions: [
+                    { id: 'E1', text: 'Las decisiones se toman con la velocidad necesaria para el negocio.' },
+                    { id: 'E2', text: 'Rara vez tengo que rehacer trabajo por cambios de última hora en las prioridades.' },
+                    { id: 'E3', text: 'La coordinación entre áreas funciona de manera fluida.' },
+                    { id: 'E4', text: 'Los procesos de aprobación son proporcionales a la importancia de la decisión.' },
+                    { id: 'E5', text: 'Las reuniones en las que participo son productivas y terminan con decisiones claras.' },
+                    { id: 'E6', text: 'Dedico la mayor parte de mi tiempo a trabajo productivo, no a alinear o validar.' },
+                ]
+            }
+        ];
+
+        const OPEN_QUESTIONS = [
+            { id: 'F1', text: '¿Qué es lo que mejor funciona hoy en cómo se toman decisiones en TBC?' },
+            { id: 'F2', text: '¿Qué cambiarías para que la toma de decisiones funcione mejor?' },
+            { id: 'F3', text: '¿Hay algo que te gustaría agregar sobre cómo funciona la organización hoy?' },
+        ];
+
+        const AREAS = ['Comercial', 'Operaciones / Supply Chain', 'Finanzas / Administración', 'Personas / RRHH', 'Tecnología', 'Otra'];
+        const NIVELES = ['Gerente', 'Subgerente / Jefe', 'Coordinador / Supervisor', 'Analista / Especialista'];
+        const ANTIGUEDAD = ['Menos de 1 año', '1 a 3 años', '3 a 5 años', 'Más de 5 años'];
+
+        function App() {
+            const [currentStep, setCurrentStep] = React.useState('intro');
+            const [currentSection, setCurrentSection] = React.useState(0);
+            const [answers, setAnswers] = React.useState({});
+            const [openAnswers, setOpenAnswers] = React.useState({});
+            const [demographics, setDemographics] = React.useState({ area: '', nivel: '', antiguedad: '' });
+            const [submitted, setSubmitted] = React.useState(false);
+            const [isSubmitting, setIsSubmitting] = React.useState(false);
+            const [submitError, setSubmitError] = React.useState(null);
+
+            const handleAnswer = (questionId, value) => {
+                setAnswers(prev => ({ ...prev, [questionId]: value }));
+            };
+
+            const handleOpenAnswer = (questionId, value) => {
+                setOpenAnswers(prev => ({ ...prev, [questionId]: value }));
+            };
+
+            const handleDemographic = (field, value) => {
+                setDemographics(prev => ({ ...prev, [field]: value }));
+            };
+
+            const isSectionComplete = (sectionIndex) => {
+                const section = SECTIONS[sectionIndex];
+                return section.questions.every(q => answers[q.id] !== undefined);
+            };
+
+            const getProgress = () => {
+                const totalQuestions = SECTIONS.reduce((acc, s) => acc + s.questions.length, 0);
+                const answered = Object.keys(answers).length;
+                return Math.round((answered / totalQuestions) * 100);
+            };
+
+            const handleSubmit = async () => {
+                if (GOOGLE_SCRIPT_URL === 'PEGA_AQUI_TU_URL') {
+                    setSubmitError('Error de configuración: Falta configurar la URL del servidor.');
+                    return;
+                }
+                
+                setIsSubmitting(true);
+                setSubmitError(null);
+                
+                const response = {
+                    id: Date.now(),
+                    timestamp: new Date().toISOString(),
+                    answers,
+                    openAnswers,
+                    demographics
+                };
+                
+                try {
+                    await fetch(GOOGLE_SCRIPT_URL, {
+                        method: 'POST',
+                        mode: 'no-cors',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(response)
+                    });
+                    setSubmitted(true);
+                } catch (error) {
+                    console.error('Error al enviar:', error);
+                    setSubmitError('Hubo un error al enviar. Por favor intenta de nuevo.');
+                } finally {
+                    setIsSubmitting(false);
+                }
+            };
+
+            // Intro Screen
+            if (currentStep === 'intro') {
+                return (
+                    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
+                        <div className="max-w-2xl mx-auto px-6 py-12 fade-in">
+                            <div className="text-center mb-12">
+                                <div className="inline-flex items-center gap-2 text-blue-900 font-semibold text-sm mb-6">
+                                    <div className="w-8 h-1 bg-emerald-500 rounded"></div>
+                                    TBC
+                                    <div className="w-8 h-1 bg-emerald-500 rounded"></div>
+                                </div>
+                                <h1 className="text-4xl font-light text-slate-800 mb-4">
+                                    Encuesta<br/><span className="font-semibold">Modelo Operativo</span>
+                                </h1>
+                                <p className="text-slate-500">Diagnóstico de claridad, autonomía y toma de decisiones</p>
+                            </div>
+
+                            <div className="bg-white rounded-2xl shadow-lg shadow-slate-200/50 p-8 mb-8">
+                                <h2 className="text-lg font-semibold text-slate-800 mb-4">Bienvenido/a</h2>
+                                <p className="text-slate-600 mb-6 leading-relaxed">
+                                    Esta encuesta busca entender cómo funcionan hoy los procesos de decisión, 
+                                    coordinación y ejecución en TBC. Tu perspectiva es fundamental para identificar 
+                                    oportunidades de mejora que nos permitan escalar con mayor claridad y efectividad.
+                                </p>
+                                
+                                <div className="flex items-start gap-4 p-4 bg-slate-50 rounded-xl mb-6">
+                                    <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
+                                        <svg className="w-5 h-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <div className="font-medium text-slate-800">Tiempo estimado</div>
+                                        <div className="text-slate-500 text-sm">10-15 minutos</div>
+                                    </div>
+                                </div>
+
+                                <div className="flex items-start gap-4 p-4 bg-emerald-50 rounded-xl">
+                                    <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0">
+                                        <svg className="w-5 h-5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <div className="font-medium text-slate-800">Confidencialidad</div>
+                                        <div className="text-slate-500 text-sm">Las respuestas son completamente anónimas. Los resultados se reportarán de forma agregada.</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <button
+                                onClick={() => setCurrentStep('survey')}
+                                className="w-full bg-blue-900 text-white py-4 px-6 rounded-xl font-medium hover:bg-blue-800 transition-colors shadow-lg shadow-blue-900/20"
+                            >
+                                Comenzar encuesta
+                            </button>
+                        </div>
+                    </div>
+                );
+            }
+
+            // Submitted Screen
+            if (submitted) {
+                return (
+                    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-emerald-50 flex items-center justify-center p-6">
+                        <div className="max-w-md w-full text-center fade-in">
+                            <div className="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                                <svg className="w-10 h-10 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                </svg>
+                            </div>
+                            <h1 className="text-3xl font-semibold text-slate-800 mb-4">¡Gracias!</h1>
+                            <p className="text-slate-600 mb-8">
+                                Tu respuesta ha sido registrada exitosamente. Tu perspectiva es muy valiosa para mejorar cómo trabajamos en TBC.
+                            </p>
+                        </div>
+                    </div>
+                );
+            }
+
+            // Survey
+            const section = SECTIONS[currentSection];
+            const showOpenQuestions = currentSection === SECTIONS.length;
+            const showDemographics = currentSection === SECTIONS.length + 1;
+
+            return (
+                <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
+                    {/* Progress Header */}
+                    <div className="sticky top-0 bg-white/80 backdrop-blur-lg border-b border-slate-100 z-40">
+                        <div className="max-w-2xl mx-auto px-6 py-4">
+                            <div className="flex items-center justify-between mb-2">
+                                <span className="text-sm text-slate-500">Progreso</span>
+                                <span className="text-sm font-medium text-blue-900">{getProgress()}%</span>
+                            </div>
+                            <div className="w-full bg-slate-100 rounded-full h-1.5">
+                                <div 
+                                    className="bg-gradient-to-r from-blue-600 to-emerald-500 h-1.5 rounded-full transition-all duration-500"
+                                    style={{ width: `${getProgress()}%` }}
+                                ></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="max-w-2xl mx-auto px-6 py-8">
+                        {/* Section Navigation */}
+                        <div className="flex gap-2 mb-8 overflow-x-auto pb-2">
+                            {SECTIONS.map((s, idx) => (
+                                <button
+                                    key={s.id}
+                                    onClick={() => setCurrentSection(idx)}
+                                    className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-all ${
+                                        idx === currentSection 
+                                            ? 'bg-blue-900 text-white shadow-lg shadow-blue-900/20' 
+                                            : isSectionComplete(idx)
+                                                ? 'bg-emerald-100 text-emerald-700'
+                                                : 'bg-white text-slate-500 hover:bg-slate-50'
+                                    }`}
+                                >
+                                    {s.id}
+                                </button>
+                            ))}
+                            <button
+                                onClick={() => setCurrentSection(SECTIONS.length)}
+                                className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-all ${
+                                    showOpenQuestions ? 'bg-blue-900 text-white' : 'bg-white text-slate-500 hover:bg-slate-50'
+                                }`}
+                            >
+                                F
+                            </button>
+                            <button
+                                onClick={() => setCurrentSection(SECTIONS.length + 1)}
+                                className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-all ${
+                                    showDemographics ? 'bg-blue-900 text-white' : 'bg-white text-slate-500 hover:bg-slate-50'
+                                }`}
+                            >
+                                ✓
+                            </button>
+                        </div>
+
+                        {/* Likert Section */}
+                        {!showOpenQuestions && !showDemographics && (
+                            <div className="bg-white rounded-2xl shadow-lg shadow-slate-200/50 p-8 fade-in">
+                                <div className="mb-8">
+                                    <div className="inline-flex items-center gap-2 px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium mb-4">
+                                        Sección {section.id}
+                                    </div>
+                                    <h2 className="text-2xl font-semibold text-slate-800 mb-2">{section.title}</h2>
+                                    <p className="text-slate-500">{section.description}</p>
+                                </div>
+
+                                <div className="flex justify-between text-xs text-slate-400 mb-6 px-2">
+                                    <span>Muy en desacuerdo</span>
+                                    <span>Muy de acuerdo</span>
+                                </div>
+
+                                <div className="space-y-6">
+                                    {section.questions.map((q) => (
+                                        <div key={q.id} className="p-4 rounded-xl bg-slate-50 hover:bg-slate-100 transition-colors">
+                                            <div className="flex gap-4">
+                                                <span className="text-blue-900 font-semibold text-sm mt-1">{q.id}</span>
+                                                <div className="flex-1">
+                                                    <p className="text-slate-700 mb-4">{q.text}</p>
+                                                    <div className="flex justify-between gap-2">
+                                                        {[1, 2, 3, 4, 5].map(value => (
+                                                            <button
+                                                                key={value}
+                                                                onClick={() => handleAnswer(q.id, value)}
+                                                                className={`flex-1 py-3 rounded-lg font-medium transition-all ${
+                                                                    answers[q.id] === value
+                                                                        ? 'bg-blue-900 text-white shadow-lg shadow-blue-900/20 scale-105'
+                                                                        : 'bg-white text-slate-600 hover:bg-blue-50 border border-slate-200'
+                                                                }`}
+                                                            >
+                                                                {value}
+                                                            </button>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+
+                                <div className="flex justify-between mt-8 pt-6 border-t border-slate-100">
+                                    <button
+                                        onClick={() => setCurrentSection(prev => Math.max(0, prev - 1))}
+                                        disabled={currentSection === 0}
+                                        className="px-6 py-3 text-slate-500 hover:text-slate-700 disabled:opacity-30 font-medium"
+                                    >
+                                        ← Anterior
+                                    </button>
+                                    <button
+                                        onClick={() => setCurrentSection(prev => prev + 1)}
+                                        className="px-6 py-3 bg-blue-900 text-white rounded-xl font-medium hover:bg-blue-800 transition-colors shadow-lg shadow-blue-900/20"
+                                    >
+                                        Siguiente →
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Open Questions */}
+                        {showOpenQuestions && (
+                            <div className="bg-white rounded-2xl shadow-lg shadow-slate-200/50 p-8 fade-in">
+                                <div className="mb-8">
+                                    <div className="inline-flex items-center gap-2 px-3 py-1 bg-emerald-100 text-emerald-700 rounded-full text-sm font-medium mb-4">
+                                        Sección F
+                                    </div>
+                                    <h2 className="text-2xl font-semibold text-slate-800 mb-2">Preguntas abiertas</h2>
+                                    <p className="text-slate-500">Estas preguntas son opcionales pero muy valiosas.</p>
+                                </div>
+
+                                <div className="space-y-6">
+                                    {OPEN_QUESTIONS.map(q => (
+                                        <div key={q.id}>
+                                            <label className="block text-slate-700 font-medium mb-3">{q.id}. {q.text}</label>
+                                            <textarea
+                                                value={openAnswers[q.id] || ''}
+                                                onChange={(e) => handleOpenAnswer(q.id, e.target.value)}
+                                                className="w-full p-4 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none transition-shadow"
+                                                rows={4}
+                                                placeholder="Escribe tu respuesta aquí..."
+                                            />
+                                        </div>
+                                    ))}
+                                </div>
+
+                                <div className="flex justify-between mt-8 pt-6 border-t border-slate-100">
+                                    <button
+                                        onClick={() => setCurrentSection(SECTIONS.length - 1)}
+                                        className="px-6 py-3 text-slate-500 hover:text-slate-700 font-medium"
+                                    >
+                                        ← Anterior
+                                    </button>
+                                    <button
+                                        onClick={() => setCurrentSection(SECTIONS.length + 1)}
+                                        className="px-6 py-3 bg-blue-900 text-white rounded-xl font-medium hover:bg-blue-800 transition-colors shadow-lg shadow-blue-900/20"
+                                    >
+                                        Siguiente →
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Demographics */}
+                        {showDemographics && (
+                            <div className="bg-white rounded-2xl shadow-lg shadow-slate-200/50 p-8 fade-in">
+                                <div className="mb-8">
+                                    <div className="inline-flex items-center gap-2 px-3 py-1 bg-amber-100 text-amber-700 rounded-full text-sm font-medium mb-4">
+                                        Último paso
+                                    </div>
+                                    <h2 className="text-2xl font-semibold text-slate-800 mb-2">Datos de clasificación</h2>
+                                    <p className="text-slate-500">Estos datos se usan solo para analizar resultados por segmento.</p>
+                                </div>
+
+                                <div className="space-y-6">
+                                    <div>
+                                        <label className="block text-slate-700 font-medium mb-3">Área</label>
+                                        <div className="grid grid-cols-2 gap-3">
+                                            {AREAS.map(area => (
+                                                <button
+                                                    key={area}
+                                                    onClick={() => handleDemographic('area', area)}
+                                                    className={`p-4 rounded-xl text-left transition-all text-sm ${
+                                                        demographics.area === area
+                                                            ? 'bg-blue-900 text-white shadow-lg'
+                                                            : 'bg-slate-50 text-slate-700 hover:bg-slate-100'
+                                                    }`}
+                                                >
+                                                    {area}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-slate-700 font-medium mb-3">Nivel</label>
+                                        <div className="grid grid-cols-2 gap-3">
+                                            {NIVELES.map(nivel => (
+                                                <button
+                                                    key={nivel}
+                                                    onClick={() => handleDemographic('nivel', nivel)}
+                                                    className={`p-4 rounded-xl text-left transition-all text-sm ${
+                                                        demographics.nivel === nivel
+                                                            ? 'bg-blue-900 text-white shadow-lg'
+                                                            : 'bg-slate-50 text-slate-700 hover:bg-slate-100'
+                                                    }`}
+                                                >
+                                                    {nivel}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-slate-700 font-medium mb-3">Antigüedad en TBC</label>
+                                        <div className="grid grid-cols-2 gap-3">
+                                            {ANTIGUEDAD.map(ant => (
+                                                <button
+                                                    key={ant}
+                                                    onClick={() => handleDemographic('antiguedad', ant)}
+                                                    className={`p-4 rounded-xl text-left transition-all text-sm ${
+                                                        demographics.antiguedad === ant
+                                                            ? 'bg-blue-900 text-white shadow-lg'
+                                                            : 'bg-slate-50 text-slate-700 hover:bg-slate-100'
+                                                    }`}
+                                                >
+                                                    {ant}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {submitError && (
+                                    <div className="mt-6 p-4 bg-red-50 text-red-700 rounded-xl text-sm">
+                                        {submitError}
+                                    </div>
+                                )}
+
+                                <div className="flex justify-between mt-8 pt-6 border-t border-slate-100">
+                                    <button
+                                        onClick={() => setCurrentSection(SECTIONS.length)}
+                                        className="px-6 py-3 text-slate-500 hover:text-slate-700 font-medium"
+                                    >
+                                        ← Anterior
+                                    </button>
+                                    <button
+                                        onClick={handleSubmit}
+                                        disabled={!demographics.area || !demographics.nivel || !demographics.antiguedad || isSubmitting}
+                                        className="px-8 py-3 bg-emerald-600 text-white rounded-xl font-medium hover:bg-emerald-700 transition-colors shadow-lg shadow-emerald-600/20 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                                    >
+                                        {isSubmitting ? (
+                                            <>
+                                                <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+                                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                                                </svg>
+                                                Enviando...
+                                            </>
+                                        ) : (
+                                            'Enviar respuestas ✓'
+                                        )}
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
+        }
+
+        ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+    </script>
+</body>
+</html>
